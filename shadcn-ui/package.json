@@ -17,10 +17,10 @@
   "homepage": "https://pick4u.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/[USERNAME]/pick4u-app.git"
+    "url": "https://github.com/eladnaim/pick4u-app.git"
   },
   "bugs": {
-    "url": "https://github.com/[USERNAME]/pick4u-app/issues"
+    "url": "https://github.com/eladnaim/pick4u-app/issues"
   },
   "scripts": {
     "dev": "vite",
