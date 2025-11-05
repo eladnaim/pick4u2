@@ -21,6 +21,7 @@ import CollectorDashboard from '@/components/CollectorDashboard';
 import NotificationsTab from '@/components/NotificationsTab';
 import UserProfile from '@/components/UserProfile';
 import ChatInterface from '@/components/ChatInterface';
+import CollectorNow from '@/components/CollectorNow';
 
 export default function Index() {
   const [user, setUser] = useState<User | null>(null);
@@ -29,6 +30,7 @@ export default function Index() {
   const [activeTab, setActiveTab] = useState('home');
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [chatRecipientId, setChatRecipientId] = useState<string | null>(null);
+  const [lang, setLang] = useState<'he' | 'en'>('he');
 
   // Test login for development
   const handleTestLogin = () => {
@@ -184,6 +186,10 @@ export default function Index() {
                     מאומת
                   </Badge>
                 )}
+                <div className="flex items-center gap-2 mr-2">
+                  <Button variant={lang === 'he' ? 'default' : 'outline'} size="sm" className="px-2" onClick={() => setLang('he')}>HE</Button>
+                  <Button variant={lang === 'en' ? 'default' : 'outline'} size="sm" className="px-2" onClick={() => setLang('en')}>EN</Button>
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -217,58 +223,28 @@ export default function Index() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
               <div className="flex-1 overflow-y-auto pb-20">
                 <TabsContent value="home" className="mt-0">
-                  <div className="p-4 space-y-6">
+                  <div className="p-6 space-y-6">
                     <div className="text-center">
-                      <h3 className="text-xl font-bold mb-2">ברוך הבא, {user.name}!</h3>
-                      <p className="text-gray-600">מה תרצה לעשות היום?</p>
+                      <h3 className="text-xl font-bold mb-2">{lang === 'he' ? `ברוך הבא, ${user.name}!` : `Welcome, ${user.name}!`}</h3>
+                      <p className="text-gray-600">{lang === 'he' ? 'בחר פעולה:' : 'Choose an action:'}</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <Card 
-                        className="cursor-pointer hover:shadow-lg transition-shadow"
+                    <div className="grid grid-cols-1 gap-4">
+                      <Button 
                         onClick={() => setActiveTab('request')}
+                        className="w-full text-xl py-6 h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl hover:shadow-2xl transition-all duration-300"
                       >
-                        <CardContent className="p-6 text-center">
-                          <Package className="h-8 w-8 mx-auto mb-3 text-blue-500" />
-                          <h4 className="font-semibold mb-1">בקש איסוף</h4>
-                          <p className="text-sm text-gray-600">פרסם בקשת איסוף חדשה</p>
-                        </CardContent>
-                      </Card>
+                        {lang === 'he' ? 'מבקש איסוף' : 'Pickup Request'}
+                      </Button>
 
                       {user.isCollector && (
-                        <Card 
-                          className="cursor-pointer hover:shadow-lg transition-shadow"
-                          onClick={() => setActiveTab('collector')}
+                        <Button 
+                          onClick={() => setActiveTab('collector_now')}
+                          className="w-full text-xl py-6 h-16 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-xl hover:shadow-2xl transition-all duration-300"
                         >
-                          <CardContent className="p-6 text-center">
-                            <Truck className="h-8 w-8 mx-auto mb-3 text-green-500" />
-                            <h4 className="font-semibold mb-1">מצא בקשות</h4>
-                            <p className="text-sm text-gray-600">עזור לאחרים ותרוויח</p>
-                          </CardContent>
-                        </Card>
+                          {lang === 'he' ? 'אני מאסף כעת' : "I'm collecting now"}
+                        </Button>
                       )}
-
-                      <Card 
-                        className="cursor-pointer hover:shadow-lg transition-shadow"
-                        onClick={() => setActiveTab('notifications')}
-                      >
-                        <CardContent className="p-6 text-center">
-                          <Bell className="h-8 w-8 mx-auto mb-3 text-orange-500" />
-                          <h4 className="font-semibold mb-1">התרעות</h4>
-                          <p className="text-sm text-gray-600">עדכונים וחדשות</p>
-                        </CardContent>
-                      </Card>
-
-                      <Card 
-                        className="cursor-pointer hover:shadow-lg transition-shadow"
-                        onClick={() => setActiveTab('profile')}
-                      >
-                        <CardContent className="p-6 text-center">
-                          <UserIcon className="h-8 w-8 mx-auto mb-3 text-purple-500" />
-                          <h4 className="font-semibold mb-1">הפרופיל שלי</h4>
-                          <p className="text-sm text-gray-600">הגדרות ופרטים</p>
-                        </CardContent>
-                      </Card>
                     </div>
                   </div>
                 </TabsContent>
@@ -280,6 +256,12 @@ export default function Index() {
                 {user.isCollector && (
                   <TabsContent value="collector" className="mt-0">
                     <CollectorDashboard user={user} onStartChat={handleStartChat} />
+                  </TabsContent>
+                )}
+
+                {user.isCollector && (
+                  <TabsContent value="collector_now" className="mt-0">
+                    <CollectorNow user={user} />
                   </TabsContent>
                 )}
 

@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Package, MapPin, Clock, DollarSign } from 'lucide-react';
 import { User } from '@/types';
+import pickupService from '@/services/pickupService';
+import notificationService from '@/services/notificationService';
 
 interface PickupRequestProps {
   user: User;
@@ -23,9 +25,43 @@ export default function PickupRequest({ user }: PickupRequestProps) {
     contactInfo: user.phone
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('בקשת האיסוף נשלחה בהצלחה! תקבל התראה כשמאסף יגיב.');
+
+    // Basic validation
+    if (!formData.pickupLocation || !formData.deliveryAddress || !formData.packageType) {
+      alert('אנא מלא את כל השדות הנדרשים');
+      return;
+    }
+
+    try {
+      const priceNumber = parseFloat(formData.maxPrice || '0');
+
+      const requestId = await pickupService.createPickupRequest({
+        userId: user.id,
+        userName: user.name,
+        userPhone: user.phone,
+        title: `בקשה מאת ${user.name}`,
+        description: formData.description || '',
+        pickupAddress: formData.pickupLocation,
+        city: user.city,
+        community: user.community || '',
+        packageType: (formData.packageType as any) || 'other',
+        size: 'small',
+        weight: 1,
+        price: isNaN(priceNumber) ? 0 : priceNumber,
+        images: [],
+        status: 'pending'
+      } as any);
+
+      await notificationService.notifyNewPickupRequest(requestId, user.city, user.community || '');
+
+      notificationService.showBrowserNotification('הבקשה שודרה', { body: 'שידור לקהילה ולמאספים באזור שלך (ש"ח)' });
+      alert('בקשת האיסוף נשלחה ושודרה לקהילה ולמאספים בש"ח');
+    } catch (err) {
+      console.error(err);
+      alert('אירעה שגיאה בשליחת הבקשה');
+    }
   };
 
   return (
@@ -149,7 +185,7 @@ export default function PickupRequest({ user }: PickupRequestProps) {
             </div>
             
             <Button type="submit" className="w-full text-xl py-6 h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl hover:shadow-2xl transition-all duration-300">
-              פרסם בקשת איסוף
+              שדר לקהילה ולמאספים
             </Button>
           </form>
         </CardContent>
